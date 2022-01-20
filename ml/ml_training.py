@@ -5,7 +5,6 @@ from pandas import DataFrame
 from sklearn.metrics import classification_report, confusion_matrix, cohen_kappa_score
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
-from imblearn.over_sampling import SMOTE
 
 # Load the training and test dataset
 X_train = pd.read_csv('gt_X_train.csv')
