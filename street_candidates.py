@@ -92,7 +92,6 @@ for t,i in enumerate(df_data.name):
         new_df.iloc[df_counter] = row
         df_counter += 1
 
-    break
 
 
 print(new_df.head())
