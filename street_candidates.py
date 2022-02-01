@@ -57,7 +57,7 @@ except:
 
 df_data = df_data.reset_index()
 
-new_df = pandas.DataFrame(index=range(len(df_data*50)),columns=feature_list)
+new_df = pandas.DataFrame(index=range(len(df_data)*50),columns=feature_list)
 df_counter = 0
 
 for t,i in enumerate(df_data.name):
