@@ -31,7 +31,7 @@ candidate_threshold = 0.5
 
 
 # ml data
-X_test = X.drop(['street', 'candidate','district'],axis=1)
+X_test = X.drop(['street', 'candidate','district','correct'],axis=1)
 
 # model
 model = load(ROOT_DIR + '/ml/rfc_1300.joblib')
