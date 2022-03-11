@@ -25,7 +25,11 @@ best_candidates_nrw.csv
 - [qwikidata](https://pypi.org/project/qwikidata/)
 
 ## Usage
-You can generate a file with all candidates for streets in Bremen or North Rhine-Westfalia using the following command. Alternatively, you can use your own file from a different region.
+To train the ML model and evaluate it, simply run the following command:
+```
+ml/ml_training.py
+```
+If you want to calculate the results of the approach on OSM, you can generate a file with all candidates for streets in Bremen or North Rhine-Westfalia using the following command. Alternatively, you can use your own file from a different region.
 ```
 street_candidates.py [ bremen | nrw | file ]
 ```
