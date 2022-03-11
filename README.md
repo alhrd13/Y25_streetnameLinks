@@ -3,7 +3,7 @@
 This project is dedicated to linking street names to the person they are named after.
 The street information is taken from [OpenStreetMap](https://www.openstreetmap.org/) and linked to person data that was generated using [Wikidata](https://www.wikidata.org/wiki/Wikidata:Main_Page) (as at May 17th 2022).
 
-Our method was tested on streets from the city of Bremen and the state of North Rhine-Westfalia in Germany. It was able to detect _896_ new person links in Bremen and _31.363_ new links in North Rhine-Westfalia respectively.
+Our method was tested on streets from the city of Bremen and the state of North Rhine-Westfalia in Germany. It was able to detect _896_ new person links in Bremen and _31.363_ new links in North Rhine-Westfalia respectively. Overall, we found _183.022_ possible street-person links in all of Germany.
 
 ## Approach
 In an effort to correctly predict the namesake for a given street, we extracted street data from OpenStreetMap and generated possible candidates for each street.
