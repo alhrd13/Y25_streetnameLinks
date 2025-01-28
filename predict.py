@@ -13,8 +13,8 @@ from joblib import load
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix, cohen_kappa_score
 
+################################################################################
 ROOT_DIR = os.getcwd()
-
 args = sys.argv
 try:
     if args[1] == 'bremen':
@@ -29,29 +29,35 @@ except:
 
 candidate_threshold = 0.5
 
+#---------------------------------
+path_ml = '/ml/rfc_1300.joblib'
+path_export_results_pred = 'best_candidate.csv'
 
-# ml data
-X_test = X.drop(['street', 'candidate','district','correct'],axis=1)
+################################################################################
 
-# model
-model = load(ROOT_DIR + '/ml/rfc_1300.joblib')
+if __name__ == "__main__":
+    # ml data
+    X_test = X.drop(['street', 'candidate','district','correct'],axis=1)
 
-# predict
-prob = model.predict_proba(X_test)
-proba = []
-for p in prob:
-    proba.append(p[1])
-X['proba'] = proba
+    # model
+    model = load(ROOT_DIR + path_ml)
 
-# Sort by propability and then remove duplicate streets and districts
-# This should leave the best candidate for every street per district
-X = X.sort_values(by=['proba'], ascending=False).drop_duplicates(subset=['street','district'], keep='first')
+    # predict
+    prob = model.predict_proba(X_test)
+    proba = []
+    for p in prob:
+        proba.append(p[1])
+    X['proba'] = proba
 
-
-
-# Drop all candidates below the treshold
-X.drop(X[ X['proba'] < candidate_threshold].index,inplace=True)
+    # Sort by propability and then remove duplicate streets and districts
+    # This should leave the best candidate for every street per district
+    X = X.sort_values(by=['proba'], ascending=False).drop_duplicates(subset=['street','district'], keep='first')
 
 
-with open('best_candidate.csv','w') as output:
-    X.to_csv(output,header=True,index=False)
+
+    # Drop all candidates below the treshold
+    X.drop(X[ X['proba'] < candidate_threshold].index,inplace=True)
+
+
+    with open(path_export_results_pred,'w') as output:
+        X.to_csv(output,header=True,index=False)

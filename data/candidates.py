@@ -1,34 +1,43 @@
 import re
 
-def get_candidates(query,prefix,suffix,linx,index):
-# Remove '-'
+################################################################################
+
+def get_candidates(
+        query,
+        prefix,
+        suffix,
+        linx,
+        index,
+    ):
+
+    # Remove '-'
     query = query.replace('-', ' ').rstrip()
-# Remove extras: streetname (extras)
+    # Remove extras: streetname (extras)
     if query.endswith(')') == True:
         try:
             extra = re.findall('\(.*\)', query)
             query = query.replace(extra[0],'').rstrip()
         except:
             return False
-# Remove initials
+    # Remove initials
     initials = re.findall('[A-Z]\. ',query)
     for init in initials:
         query = query.replace(init,'').rstrip().lstrip()
-# Remove suffix
+    # Remove suffix
     for s in suffix:
         if query.endswith(s) == True:
             query = query.replace(s,'').rstrip().lstrip()
             break
-# Remove prefix
+    # Remove prefix
     for p in prefix:
         query = query.replace(p,'').rstrip().lstrip()
 
-# Skip street if the query is empty after filtering
+    # Skip street if the query is empty after filtering
     if len(query) == 0:
         return False
-# Popularity Ranking
+    # Popularity Ranking
     result = index.get(query)
-# Add a '-' if between the last two names if no result was returned
+    # Add a '-' if between the last two names if no result was returned
     if result == False:
         backspace = query.rfind(' ')
         if backspace > -1:
@@ -36,8 +45,8 @@ def get_candidates(query,prefix,suffix,linx,index):
             query_list[backspace] = '-'
             query = ''.join(query_list)
             result = index.get(query)
-# Remove the last 's' if there is still no result (e.g. 'Müllersweg')
-# If there are still no results after that, skip to this street
+    # Remove the last 's' if there is still no result (e.g. 'Müllersweg')
+    # If there are still no results after that, skip to this street
     if result == False:
         if query.endswith('s') == True:
             query_list = list(query)
@@ -53,7 +62,13 @@ def get_candidates(query,prefix,suffix,linx,index):
 
     return result
 
-def get_hierarchy(start, places):
+################################################################################
+
+def get_hierarchy(
+        start, 
+        places,
+    ):
+
     list = []
     list.append(start)
     while True:
@@ -69,7 +84,14 @@ def get_hierarchy(start, places):
         pass
     return list
 
-def get_highest_relation_score(street_hier, person_hier, places):
+################################################################################
+
+def get_highest_relation_score(
+        street_hier, 
+        person_hier, 
+        places,
+    ):
+
     length = len(street_hier)
     max_score, current_val = 0, 0
     for j in person_hier:
@@ -83,29 +105,43 @@ def get_highest_relation_score(street_hier, person_hier, places):
     return max_score
 
 
-def get_candidate_relations(street, candidate, places, person_places):
-# Initiating data
+################################################################################
+
+def get_candidate_relations(
+        street, 
+        candidate, 
+        places, 
+        person_places,
+    ):
+
+        # Initiating data
     rel = [0, 0, 0, 0, 0]
     place_list = person_places.get(candidate)
     if place_list == False:
         return rel
-#    street_hier = get_hierarchy(street, places)
+    #    street_hier = get_hierarchy(street, places)
     street_hier = street
 
-# Calculate relation score for birth place# Calculate relation score for birth place
+    # Calculate relation score for birth place# Calculate relation score for birth place
     rel[0] = get_highest_relation_score(street_hier, place_list[0], places)
-# Calculate relation score for death place
+    # Calculate relation score for death place
     rel[1] = get_highest_relation_score(street_hier, place_list[1], places)
-# Calculate relation score for burial place
+    # Calculate relation score for burial place
     rel[2] = get_highest_relation_score(street_hier, place_list[2], places)
-# Calculate relation score for education place
+    # Calculate relation score for education place
     rel[3] = get_highest_relation_score(street_hier, place_list[3], places)
-# Calculate relation score for residence place
+    # Calculate relation score for residence place
     rel[4] = get_highest_relation_score(street_hier, place_list[4], places)
 
     return rel
 
-def get_occupations(candidate, occDB):
+################################################################################
+
+def get_occupations(
+        candidate, 
+        occDB,
+    ):
+
     occ_data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     occs = occDB.get(candidate)
     if occs == False:
@@ -155,8 +191,12 @@ def get_occupations(candidate, occDB):
 
     return occ_data
 
+################################################################################
 
-def get_names(candidate):
+def get_names(
+        candidate,
+    ):
+
     name_list = [0,0,0,0]
 
     if candidate[1] == 'full':
@@ -170,7 +210,13 @@ def get_names(candidate):
 
     return name_list
 
-def get_max_50(candidate_list, links):
+################################################################################
+
+def get_max_50(
+        candidate_list, 
+        links,
+    ):
+
     candidate_dict = {}
     for c in candidate_list:
         count = 0

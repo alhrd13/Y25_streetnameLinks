@@ -3,72 +3,104 @@ import sys
 import pickledb as p
 import json
 
-# Get root directory
-ROOT_DIR = os.path.abspath("../..")
-sys.path.append(ROOT_DIR)
+#.................................
+import os, sys
+from IPython.core.ultratb import ColorTB
+import yaml
+
+sys.excepthook = ColorTB()
+
+WKSPACE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PATH_CFG = './config.yml'
+
+sys.path.append(WKSPACE)
+PATH_CFG = os.path.join(WKSPACE, PATH_CFG)
+
+with open(PATH_CFG, 'r') as file:
+    PARAMS = yaml.safe_load(file)
+#.................................
+
+# # Get root directory
+# ROOT_DIR = os.path.abspath("../..")
+# sys.path.append(ROOT_DIR)
 
 # Get Wikidata ground truth
 #GT_PATH = os.path.join(ROOT_DIR,"/data/wikidata/wikidata_all.json")
-GT_PATH = ROOT_DIR + "/data/wikidata/wikidata_all.json"
+# GT_PATH = ROOT_DIR + "/data/wikidata/wikidata_all.json"
 
-with open(GT_PATH, encoding='utf-8') as fh:
-    streets = json.load(fh)
+################################################################################
 
-# Get person and name database
-PERSON_PATH = ROOT_DIR + "/data/wikidata/all_new_names.db"
-NAME_PATH = ROOT_DIR + "/data/wikidata/name_data.db"
-personDB = p.load(PERSON_PATH, False)
-nameDB = p.load(NAME_PATH, False)
+# Import
+GT_PATH = PARAMS['path']['json_gt']
+PERSON_PATH = PARAMS['path']['db_all_new_names']
+NAME_PATH = PARAMS['path']['db_name_data']
 
-suffixe = []
+# Export
+path_json_all_affixes = PARAMS['path']['json_all_affixes']
 
-# Loop through all streets of the ground truth
-for t,i in enumerate(streets['results']['bindings']):
-    street = i['streetLabel']['value'].replace('-',' ')
-    qid = i['person']['value'].replace('http://www.wikidata.org/entity/','')
-    label = i['personLabel']['value']
+################################################################################
 
-    # Get person names and remove them from each street
-    names = personDB.get(qid)
-    test = []
-    for n in names:
-        test.extend(n)
-    try:
-        test.remove('')
-    except:
-        pass
+if __name__ == '__main__':
 
-    for t,j in enumerate(test):
-        x = nameDB.get(j)
-        if x != False:
-            test[t] = x[0]
+    with open(GT_PATH, encoding='utf-8') as fh:
+        streets = json.load(fh)
 
-    last = label.split()
-    test.append(label)
-    test.reverse()
-    test.extend(last)
-    test.append(last[-1].replace('-',' '))
-    for k in test:
-        street = street.replace(k,'')
+    # # Get person and name database
+    # PERSON_PATH = ROOT_DIR + "/data/wikidata/all_new_names.db"
+    # NAME_PATH = ROOT_DIR + "/data/wikidata/name_data.db"
 
-    street = street.rstrip().lstrip()
-    try:
-        street = street.split()
-        suffixe.extend(street)
-    except:
-        suffixe.append(street)
+    personDB = p.load(PERSON_PATH, False)
+    nameDB = p.load(NAME_PATH, False)
 
-    # Add remaining affix to affix list
-#    suffixe.append(street)
+    suffixe = []
 
-# Remove duplicates
-suffixe = list(dict.fromkeys(suffixe))
+    # Loop through all streets of the ground truth
+    for t,i in enumerate(streets['results']['bindings']):
+        street = i['streetLabel']['value'].replace('-',' ')
+        qid = i['person']['value'].replace('http://www.wikidata.org/entity/','')
+        label = i['personLabel']['value']
 
-# Sort by length
-suffixe.sort(key=len)
+        # Get person names and remove them from each street
+        names = personDB.get(qid)
+        test = []
+        for n in names:
+            test.extend(n)
+        try:
+            test.remove('')
+        except:
+            pass
+
+        for t,j in enumerate(test):
+            x = nameDB.get(j)
+            if x != False:
+                test[t] = x[0]
+
+        last = label.split()
+        test.append(label)
+        test.reverse()
+        test.extend(last)
+        test.append(last[-1].replace('-',' '))
+        for k in test:
+            street = street.replace(k,'')
+
+        street = street.rstrip().lstrip()
+        try:
+            street = street.split()
+            suffixe.extend(street)
+        except:
+            suffixe.append(street)
+
+        # Add remaining affix to affix list
+    #    suffixe.append(street)
+
+    # Remove duplicates
+    suffixe = list(dict.fromkeys(suffixe))
+
+    # Sort by length
+    suffixe.sort(key=len)
 
 
-dumped = json.dumps(suffixe, indent = 4)
-with open('all_affixe.json','w') as output:
-    output.write(dumped)
+    dumped = json.dumps(suffixe, indent = 4)
+    with open(path_json_all_affixes,'w') as output:
+        output.write(dumped)
 

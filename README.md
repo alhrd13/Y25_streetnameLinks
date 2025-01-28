@@ -38,3 +38,57 @@ You can then predict the most likely person from the aforementioned candidates f
 predict.py [bremen | nrw | file]
 ```
 The code will return a csv-file containing the candidate with the highest score above a certain threshold for each street.
+
+
+
+# Data
+## Imported data
+
+## Create databases
+|`all_new_names.db`|`./data/dump/all_new.py`|
+|`all_new_occs.db`|`./data/dump/all_new.py`|
+|`all_new_places.db`|`./data/dump/all_new.py`|
+|`all_new_labels.db`|`./data/dump/all_new.py`|
+|`places.db`|`./data/dump/dump_places.py`|
+|`test.db`|`./data/osm/districts_bremen.py`|
+|`named_bremen.csv`|`./data/osm/reduce.py`|
+|`new_index.db`|`./data/wikidata/new_index.py`|
+|`new_names.db`|`./data/wikidata/new_names.py`|
+
+
+`python3 -m venv env_street`
+`source env_street/bin/activate`
+`pip install -r Y25_streetnameLinks/requirements.txt`
+
+
+- Download data on:
+  - Wikidata
+    - `curl -o Y25_streetnameLinks/data/wikidata_all.json.bz2 https://dumps.wikimedia.org/wikidatawiki/entities/latest-all.json.bz2` 
+    - Choose a dump: e.g. "wikidata-20210517-all.json.bz2"
+  - OSM
+    - 
+  - Execute:
+    - Wikidata
+      - `data/dump/all_new.py`:
+        - Create:
+          - all_new_names.db'
+          - all_new_occs.db
+          - all_new_places.db
+          - all_new_labels.db
+      - `data/dump/dump_places.py`
+        - Creates:
+          - places.db
+      - `data/dump/dump_places02.py`
+        - Creates:
+          - extra.db
+    - OSM
+      - `data/osm/districts_bremen.py`
+        - Creates
+          - test.py
+      - `data/osm/reduce.py`
+        - Creates:
+          - named_bremen.py
+
+
+? qwiki
+PATH = ROOT_DIR + "/data/wikidata/filtered_subprops.json"

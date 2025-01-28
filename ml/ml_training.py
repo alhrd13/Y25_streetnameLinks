@@ -6,35 +6,78 @@ from sklearn.metrics import classification_report, confusion_matrix, cohen_kappa
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 
-# Load the training and test dataset
-X_train = pd.read_csv('gt_X_train.csv')
-y_train = pd.read_csv('gt_y_train.csv')
-y_train = y_train.correct
-X_train.drop(columns='street',inplace=True)
-X_train.drop(columns='candidate', inplace=True)
+#.................................
+import os, sys
+from IPython.core.ultratb import ColorTB
+import yaml
 
-X_test = pd.read_csv('gt_X_test.csv')
-y_test = pd.read_csv('gt_y_test.csv')
+sys.excepthook = ColorTB()
 
-y_test = y_test.correct
-X_test.drop(columns='street',inplace=True)
-X_test.drop(columns='candidate',inplace=True)
+WKSPACE = os.path.dirname(os.path.abspath(__file__))
+PATH_CFG = './config.yml'
 
-# Train the model
-model = RandomForestClassifier(n_estimators=1300, criterion = 'gini')
-model.fit(X_train,y_train)
+sys.path.append(WKSPACE)
+PATH_CFG = os.path.join(WKSPACE, PATH_CFG)
 
-print('start fitting')
-t1 = time.time()
+with open(PATH_CFG, 'r') as file:
+    PARAMS = yaml.safe_load(file)
+#.................................
 
-dump(model, 'rfc_1300.joblib')
+test_size = PARAMS['train']['split_data']
+path_X_train = PARAMS['path']['path_X_train']
+path_y_train = PARAMS['path']['path_y_train']
+path_X_test = PARAMS['path']['path_X_test']
+path_y_test = PARAMS['path']['path_y_test']
 
-# Evaluate model
-print(confusion_matrix(y_test, model.predict(X_test)))
-print(classification_report(y_test, model.predict(X_test)))
-print(cohen_kappa_score(y_test,model.predict(X_test)))
+################################################################################
+# Import
+path_X_train = PARAMS['path']['path_X_train']
+path_y_train = PARAMS['path']['path_y_train']
+path_X_test = PARAMS['path']['path_X_test']
+path_y_test = PARAMS['path']['path_y_test']
 
-t2 = time.time()
-print('Fitting time: {}'.format(t2-t1))
+# Export
+path_ml = PARAMS['path']['ml']
+
+#.................................
+do_test = True
+
+################################################################################
+
+if __name__ == "__main__":
+
+    # Load the training and test dataset
+    X_train = pd.read_csv(path_X_train)
+    y_train = pd.read_csv(path_y_train)
+    y_train = y_train.correct
+    X_train.drop(columns='street',inplace=True)
+    X_train.drop(columns='candidate', inplace=True)
+
+    if do_test:
+        X_test = pd.read_csv(path_X_test)
+        y_test = pd.read_csv(path_y_test)
+
+    y_test = y_test.correct
+    if do_test:
+        X_test.drop(columns='street',inplace=True)
+        X_test.drop(columns='candidate',inplace=True)
+
+    # Train the model
+    model = RandomForestClassifier(n_estimators=1300, criterion = 'gini')
+    model.fit(X_train,y_train)
+
+    print('start fitting')
+    t1 = time.time()
+
+    dump(model, path_ml)
+
+    # Evaluate model
+    if do_test:
+        print(confusion_matrix(y_test, model.predict(X_test)))
+        print(classification_report(y_test, model.predict(X_test)))
+        print(cohen_kappa_score(y_test,model.predict(X_test)))
+
+    t2 = time.time()
+    print('Fitting time: {}'.format(t2-t1))
 
 

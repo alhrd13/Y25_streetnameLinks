@@ -4,10 +4,30 @@ from qwikidata.entity import WikidataItem, WikidataProperty, WikidataLexeme
 from qwikidata.claim import WikidataClaimGroup,WikidataClaim
 import json
 
-ROOT_DIR = os.path.abspath("..")
+#.................................
+import os, sys
+from IPython.core.ultratb import ColorTB
+import yaml
 
-PATH = ROOT_DIR + "/data/wikidata/filtered_subprops.json"
-f = json.load(open(PATH,'r'))
+sys.excepthook = ColorTB()
+
+WKSPACE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PATH_CFG = './config.yml'
+
+sys.path.append(WKSPACE)
+PATH_CFG = os.path.join(WKSPACE, PATH_CFG)
+
+with open(PATH_CFG, 'r') as file:
+    PARAMS = yaml.safe_load(file)
+#.................................
+
+path_subprops = PARAMS['path']['path_subprops']
+path_subprops = os.path.join(
+    WKSPACE,
+    path_subprops,
+)
+
+f = json.load(open(path_subprops,'r'))
 
 lang = ['de', 'en', 'fr', 'ru']
 
@@ -25,6 +45,8 @@ street_claims = [
 'P138'  #named after
 ]
 
+################################################################################
+
 def is_person_or_street(entity):
     try:
         claim_group = entity.get_truthy_claim_group('P31')
@@ -37,6 +59,7 @@ def is_person_or_street(entity):
     except:
         return False
 
+################################################################################
 
 def filtered_properties(entity_dict, is_type):
     item = {
@@ -97,3 +120,5 @@ def filtered_properties(entity_dict, is_type):
             pass
 
     return item
+
+################################################################################

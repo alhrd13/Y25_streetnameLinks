@@ -7,9 +7,48 @@ from qwiki import filtered_properties, is_person_or_street
 import json
 import pickledb as p
 
-# create an instance of WikidataJsonDump
-wjd_dump_path = "wikidata-20210517-all.json.bz2"
-wjd = WikidataJsonDump(wjd_dump_path)
+"""
+This function reads the wikidata and exports into a database and JSON:
+(key=entity.entity_id, val=[(educated_list), (work_list)])
+"""
+
+#.................................
+import os, sys
+from IPython.core.ultratb import ColorTB
+import yaml
+
+sys.excepthook = ColorTB()
+
+WKSPACE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PATH_CFG = './config.yml'
+
+sys.path.append(WKSPACE)
+PATH_CFG = os.path.join(WKSPACE, PATH_CFG)
+
+with open(PATH_CFG, 'r') as file:
+    PARAMS = yaml.safe_load(file)
+#.................................
+
+
+################################################################################
+# User params
+################################################################################
+
+# # Input
+# wjd_dump_path = "wikidata-20210517-all.json.bz2"
+
+# # Output
+# path_output_db = 'extra.db'
+# path_output_json = 'extra.json'
+
+# Input
+wjd_dump_path = PARAMS["path"]["wjd_dump_path"]
+
+# Output
+path_output_db =PARAMS["path"]["extra_db"]
+path_output_json = PARAMS["path"]["extra_json"]
+
+################################################################################
 
 def create_item(entity):
     educated_list = []
@@ -32,41 +71,57 @@ def create_item(entity):
     except:
         pass
 
-
+    #.................................
+    # Output
     key = entity.entity_id
     value=[
-    (educated_list),
-    (work_list)
+        (educated_list),
+        (work_list)
     ]
     return (key,value)
 
-# Load the orte database
-db = p.load('extra.db', False)
+################################################################################
 
-ENTITY_TYPE = 'person'
+if __name__ == "main__":
 
-#create an iterable of WikidataItem
-results = []
-t1 = time.time()
-for ii, entity_dict in enumerate(wjd):
-    if entity_dict["type"] == "item":
-        entity = WikidataItem(entity_dict)
-        if is_person_or_street(entity) == ENTITY_TYPE:
-            res = create_item(entity)
-            results.append(res)
-            db.set(res[0],res[1])
-        else:
-            pass
+    # create an instance of WikidataJsonDump
+    wjd = WikidataJsonDump(wjd_dump_path)
 
-    if ii % 10000 == 0:
-        t2 = time.time()
-        dt = t2 - t1
-        print(
-            len(results),ii,dt
-        )
+    # Load the orte database
+    db = p.load(path_output_db, False)
 
-db.dump()
-x = json.dumps(results,indent=4)
-with open('extra.json','w') as output:
-    output.write(x)
+
+    # Create an iterable of WikidataItem
+    ENTITY_TYPE = 'person'
+    
+    results = []
+    t1 = time.time()
+    
+    for ii, entity_dict in enumerate(wjd):
+        if entity_dict["type"] == "item":
+            entity = WikidataItem(entity_dict)
+            if is_person_or_street(entity) == ENTITY_TYPE:
+
+                # res = (key=entity.entity_id, val=[(educated_list), (work_list)])
+                res = create_item(entity)
+                results.append(res)
+                db.set(res[0],res[1])
+            else:
+                pass
+
+        # Output to see the progression
+        if ii % 10000 == 0:
+            t2 = time.time()
+            dt = t2 - t1
+            print(
+                len(results),ii,dt
+            )
+
+    # First export as a database
+    db.dump()
+
+    # Second export as a JSON
+    x = json.dumps(results,indent=4)
+    with open(path_output_json,'w') as output:
+        output.write(x)
 

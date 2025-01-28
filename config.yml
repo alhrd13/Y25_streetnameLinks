@@ -1,0 +1,97 @@
+path:
+    # wjd_dump_path : "./data/wikidata/wikidata-20210517-all.json.bz2"
+    # db_all_new_names : './data/all_new_names.db'
+    # db_all_new_occs : './data/all_new_occs.db'
+    # db_all_new_places: './data/all_new_places.db'
+    # db_all_new_labels : './data/all_new_labels.db'
+
+    # db_extra : './data/dump/extra.db'
+    # db_json : './data/dump/extra.json'
+
+    # db_places : './data/dump/places.db'
+    # json_places : './data/dump/places.json'
+
+    # tsv_streets : './data/osm/streets_bremen.tsv'
+    # tsv_polygons : ./data/osm/'polygons_bremen.tsv'
+    # tsv_test : './data/osm/test.tsv'
+
+    # json_suffix : './data/affixes/suffixe.json'
+    # json_prefix : './data/affixes/prefixe.json'
+    # titles_json : './data/affixes/suffixe_titel.json'
+    # tsv_links : './data/link_counts_wikidata.tsv'
+    # db_new_index_person : './data/affixes/new_index.db'
+
+    # csv_named_bremen : './data/affixes/named_bremen.csv'
+
+    # # Person database
+    # db_name_data : './data/wikidata/name_data.db'
+    # db_new_index : './data/wikidata/new_index.db'
+
+    # # Wikidata ground truth
+    # json_gt : './data/wikidata/wikidata_all.json' 
+
+    # json_all_affixes : './data/wikidata/all_affixe.json'
+
+    # wjd_dump_path : "./out/wikidata-20210517-all.json.bz2"
+
+
+    ##############################################
+
+    wjd_dump_path : '/Users/alexis/Downloads/wikidatawiki-20241201-pages-meta-history27.xml-p125161897p125273261.json.bz2'
+    db_all_new_names : './out/all_new_names.db'
+    db_all_new_occs : './out/all_new_occs.db'
+    db_all_new_places: './out/all_new_places.db'
+    db_all_new_labels : './out/all_new_labels.db'
+
+    # db_extra : './out/extra.db'
+    # db_json : './out/extra.json'
+    db_extra : './out/places02.db'
+    db_json : './out/places02.json'
+
+
+    db_places : './out/places.db'
+    json_places : './out/places.json'
+
+    tsv_streets : './data/osm/streets_bremen.tsv'
+    tsv_polygons : ./data/osm/'polygons_bremen.tsv'
+    tsv_test : './out/test.tsv'
+
+    json_suffix : './data/affixes/suffixe.json'
+    json_prefix : './data/affixes/prefixe.json'
+    titles_json : './data/affixes/suffixe_titel.json'
+    tsv_links : './out/link_counts_wikidata.tsv' #TODO
+    db_new_index_person : './out/new_index.db'
+
+    csv_named_location : './out/named_bremen.csv'
+
+    # Person database
+    db_name_data : './out/name_data.db'
+    db_new_index : './out/new_index.db'
+
+    # Wikidata ground truth
+    json_gt : './out/wikidata_all.json' 
+
+    json_all_affixes : './out/all_affixe.json'
+
+    filtered_subprops : './data/wikidata/filtered_subprops.json'
+
+    street_candidates : './out/street_candidates.csv'
+
+
+    street_2_person : './out/wikidata_all.json'
+
+    gt_X_train : './out/gt_X_train.csv'
+    gt_y_train : './out/gt_y_train.csv'
+
+    gt_X_test : './out/gt_X_test.csv'
+    gt_y_test : './out/gt_y_test.csv'
+
+    ml : './out/rfc_1300.joblib'
+
+search:
+    lang: 'en'
+    # For area of reference in diustruict_bremen.py
+    id_wikidata_ref_test : 'Q24879'
+
+train:
+    test_size : .1

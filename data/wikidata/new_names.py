@@ -12,11 +12,44 @@ from qwikidata.utils import dump_entities_to_json
 import json
 import pickledb as p
 
-ROOT_DIR = os.path.abspath("../../")
+#.................................
+import os, sys
+from IPython.core.ultratb import ColorTB
+import yaml
 
-# create an instance of WikidataJsonDump
-wjd_dump_path = ROOT_DIR + "/dump/wikidata-20210517-all.json.bz2"
-wjd = WikidataJsonDump(wjd_dump_path)
+sys.excepthook = ColorTB()
+
+WKSPACE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PATH_CFG = './config.yml'
+
+sys.path.append(WKSPACE)
+PATH_CFG = os.path.join(WKSPACE, PATH_CFG)
+
+with open(PATH_CFG, 'r') as file:
+    PARAMS = yaml.safe_load(file)
+#.................................
+
+################################################################################
+# USER PARAMETERS
+################################################################################\
+
+# # Import
+# ROOT_DIR = os.path.abspath("../../")
+# wjd_dump_path = os.path.join(
+#     ROOT_DIR,
+#     "/dump/wikidata-20210517-all.json.bz2",
+# )
+
+# # Export
+# path_name_data_db = 'name_data.db'
+
+# Import
+wjd_dump_path = PARAMS["path"]["wjd_dump_path"]
+
+# Export
+path_name_data_db = PARAMS['path']['db_name_data']
+
+################################################################################
 
 def is_name(entity):
     try:
@@ -34,24 +67,37 @@ def is_name(entity):
     except:
         pass
 
-db = p.load('name_data.db', False)
-# create an iterable of WikidataItem
-results = 0
-t1 = time.time()
-for ii, entity_dict in enumerate(wjd):
-    if entity_dict["type"] == "item":
-        try:
-            entity = WikidataItem(entity_dict)
-            is_name(entity)
-        except:
-            continue
-    if ii % 1000 == 0:
-        t2 = time.time()
-        dt = t2 - t1
-        print(
-            "found {} humans among {} entities [entities/s: {:.2f}]".format(
-                results, ii, ii / dt
-            )
-        )
+################################################################################
 
-db.dump()
+if __name__ == "__main__":
+
+    # Create an instance of WikidataJsonDump
+    wjd = WikidataJsonDump(wjd_dump_path)
+
+    # Create a new database
+    db = p.load(path_name_data_db, False)
+
+    # Create an iterable of WikidataItem
+    results = 0
+    t1 = time.time()
+    for ii, entity_dict in enumerate(wjd):
+        if entity_dict["type"] == "item":
+            try:
+                entity = WikidataItem(entity_dict)
+                is_name(entity)
+            except:
+                continue
+
+        #.................................
+        # Printed output for the user
+        if ii % 1000 == 0:
+            t2 = time.time()
+            dt = t2 - t1
+            print(
+                "found {} humans among {} entities [entities/s: {:.2f}]".format(
+                    results, ii, ii / dt
+                )
+            )
+
+    # Export
+    db.dump()
