@@ -19,7 +19,7 @@ import yaml
 
 sys.excepthook = ColorTB()
 
-WKSPACE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+WKSPACE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 PATH_CFG = './config.yml'
 
 sys.path.append(WKSPACE)
@@ -45,6 +45,7 @@ with open(PATH_CFG, 'r') as file:
 
 # Import
 wjd_dump_path = PARAMS["path"]["wjd_dump_path"]
+LANG = PARAMS['search']['lang']
 
 # Export
 path_name_data_db = PARAMS['path']['db_name_data']
@@ -57,19 +58,24 @@ def is_name(entity):
         claim = claim_group[0]
         qid = claim.mainsnak.datavalue.value['id']
         if qid == 'Q1243157':
-            db.set(entity_dict['id'], [entity_dict['labels']['de']['value'], 'double'])
+            db.set(entity_dict['id'], [entity_dict['labels'][LANG]['value'], 'double'])
         if qid == 'Q11879590':
-            db.set(entity_dict['id'], [entity_dict['labels']['de']['value'], 'first'])
+            db.set(entity_dict['id'], [entity_dict['labels'][LANG]['value'], 'first'])
         if qid == 'Q12308941':
-            db.set(entity_dict['id'], [entity_dict['labels']['de']['value'], 'first'])
+            db.set(entity_dict['id'], [entity_dict['labels'][LANG]['value'], 'first'])
         if qid == 'Q101352':
-            db.set(entity_dict['id'], [entity_dict['labels']['de']['value'], 'last'])
+            db.set(entity_dict['id'], [entity_dict['labels'][LANG]['value'], 'last'])
     except:
         pass
 
 ################################################################################
 
 if __name__ == "__main__":
+
+    path_name_data_db = os.path.join(
+        WKSPACE, 
+        path_name_data_db,
+    )
 
     # Create an instance of WikidataJsonDump
     wjd = WikidataJsonDump(wjd_dump_path)
@@ -90,14 +96,10 @@ if __name__ == "__main__":
 
         #.................................
         # Printed output for the user
-        if ii % 1000 == 0:
+        if ii % 10000 == 0:
             t2 = time.time()
             dt = t2 - t1
-            print(
-                "found {} humans among {} entities [entities/s: {:.2f}]".format(
-                    results, ii, ii / dt
-                )
-            )
+            print(f"[Idx={ii}] Total time: {dt} s")
 
     # Export
     db.dump()

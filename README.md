@@ -29,10 +29,13 @@ To train the ML model and evaluate it, simply run the following command:
 ```
 ml/ml_training.py
 ```
-If you want to calculate the results of the approach on OSM, you can generate a file with all candidates for streets in Bremen or North Rhine-Westfalia using the following command. Alternatively, you can use your own file from a different region.
+(optional) If you want to calculate the results of the approach on OSM:
+- you can generate a file with all candidates for streets in Bremen or North Rhine-Westfalia using the following command
+- Alternatively, you can use your own file from a different region.
 ```
 street_candidates.py [ bremen | nrw | file ]
 ```
+
 You can then predict the most likely person from the aforementioned candidates for each street.
 ```
 predict.py [bremen | nrw | file]
@@ -42,52 +45,71 @@ The code will return a csv-file containing the candidate with the highest score 
 
 
 # Data
-## Imported data
 
-## Create databases
-|`all_new_names.db`|`./data/dump/all_new.py`|
-|`all_new_occs.db`|`./data/dump/all_new.py`|
-|`all_new_places.db`|`./data/dump/all_new.py`|
-|`all_new_labels.db`|`./data/dump/all_new.py`|
-|`places.db`|`./data/dump/dump_places.py`|
-|`test.db`|`./data/osm/districts_bremen.py`|
-|`named_bremen.csv`|`./data/osm/reduce.py`|
-|`new_index.db`|`./data/wikidata/new_index.py`|
-|`new_names.db`|`./data/wikidata/new_names.py`|
+- Install the environment:
+  - `python3 -m venv env_street`
+  - `source env_street/bin/activate`
+  - `pip install -r Y25_streetnameLinks/requirements.txt`
+
+- Create a folder `./out`
+- Add `./out/suffix.json` and `./out/prefix` with an empty JSON: []
 
 
-`python3 -m venv env_street`
-`source env_street/bin/activate`
-`pip install -r Y25_streetnameLinks/requirements.txt`
-
-
-- Download data on:
-  - Wikidata
+- Download the data:
+  - Wikidata (dump of all the data) = base of knowledge
     - `curl -o Y25_streetnameLinks/data/wikidata_all.json.bz2 https://dumps.wikimedia.org/wikidatawiki/entities/latest-all.json.bz2` 
     - Choose a dump: e.g. "wikidata-20210517-all.json.bz2"
-  - OSM
-    - 
-  - Execute:
-    - Wikidata
-      - `data/dump/all_new.py`:
-        - Create:
-          - all_new_names.db'
-          - all_new_occs.db
-          - all_new_places.db
-          - all_new_labels.db
-      - `data/dump/dump_places.py`
-        - Creates:
-          - places.db
-      - `data/dump/dump_places02.py`
-        - Creates:
-          - extra.db
-    - OSM
+  - Wikidata (with the links between street <> person) = base for ground truth (model training)
+    - `./data/wikidata/create_wikidata_all.py`
+  - For the inference = base for inference. We must create a CSV file with the following columns:
+    - Compulsory: name, district
+    - Optional: etymology_wikidata
+    - Option 1: via OSM 
+      - Use QuickOSM (QGIS) and find all the places with the tag name:etymology
+      - Use the functions in `./data/osm/districts_bremen.py` + `./data/osm/reduce.py`
+    - Option 2:
+      - Manually write your CSV file with the columns: name, district, etymology_wikidata (name should be the root of the street: Batman for John Batman Street)
+
+- Modify the paths in `./config.yml`
+- 
+- Pre-process - Execute:
+  - Wikidata
+    - `data/dump/all_new.py`:
+      - Create:
+        - all_new_names.db'
+        - all_new_occs.db
+        - all_new_places.db
+        - all_new_labels.db
+    - `data/dump/dump_places.py` ---> already integrated in `data/dump/all_new.py`
+      - Creates:
+        - places.db
+    - `data/dump/dump_places02.py` ---> already integrated in `data/dump/all_new.py`
+      - Creates:
+        - extra.db
+    - `./data/wikidata/new_names.py`
+      - Creates
+        - name_data.db
+    - `./data/wikidata/new_index.py`
+      - Creates:
+        - link_counts_wikidata.tsv
+  - Data for evaluation:
+    - Only if you use data from OSM:
       - `data/osm/districts_bremen.py`
         - Creates
-          - test.py
+          - test.tsv
       - `data/osm/reduce.py`
         - Creates:
           - named_bremen.py
+    - Otherwise, create your own csv file with the columns: name, district, etymology_wikidata 
+      - The use of `./data/affixes` is not useful
+
+- Train
+  - `ml_gt_data.py`
+  - `split_gt_data.py`
+  - `ml_training.py`
+
+- Infer:
+  - 
 
 
 ? qwiki

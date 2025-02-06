@@ -23,6 +23,7 @@ with open(PATH_CFG, 'r') as file:
     PARAMS = yaml.safe_load(file)
 #.................................
 
+
 """
 This function reads the wikidata and exports into a database and JSON:
 (key=entity.entity_id, val=[(educated_list), (work_list)])
@@ -32,31 +33,37 @@ This function reads the wikidata and exports into a database and JSON:
 # USER PARAMS
 ################################################################################
 
-# # Input
-# wjd_dump_path = "wikidata-20210517-all.json.bz2"
-# lang = 'en'
+LANG = PARAMS['search']['lang']
 
-# # Output
-# path_places_db = 'places.db'
-# path_output_json = 'places.json'
+if __name__ == "main__":
+    # # Input
+    # wjd_dump_path = "wikidata-20210517-all.json.bz2"
+    # lang = 'en'
 
-# Input
-wjd_dump_path = PARAMS["path"]["wjd_dump_path"]
-lang = PARAMS['search']['lang']
+    # # Output
+    # path_places_db = 'places.db'
+    # path_output_json = 'places.json'
 
-# Output
-path_places_db = PARAMS['path']['db_places']
-path_output_json = PARAMS['path']['json_places']
+    # Input
+    wjd_dump_path = PARAMS["path"]["wjd_dump_path"]
+
+    # Output
+    path_places_db = PARAMS['path']['db_places']
+    path_output_json = PARAMS['path']['json_places']
 
 
 ################################################################################
 
-def is_in_Germay(entity):
+def is_in_country(
+        entity,
+        country="Q183", # Germany (wikidata)
+    ):
+
     try:
         claim_group = entity.get_truthy_claim_group('P17')
         claim = claim_group[0]
         qid = claim.mainsnak.datavalue.value['id']
-        if qid == 'Q183':
+        if qid == country:
             return True
         else:
             return False
@@ -65,7 +72,7 @@ def is_in_Germay(entity):
 
 ################################################################################
 
-def create_item(entity):
+def create_item_dump_places(entity):
     #instance of
     instance_of = []
     try:
@@ -88,7 +95,7 @@ def create_item(entity):
     # value is entity label, all 'instance of' properties and 'located in' property
     key = entity.entity_id
     value=[
-        (entity.get_label(lang=lang)),
+        (entity.get_label(lang=LANG)),
         instance_of,
         (qid_p131)
     ]
@@ -97,6 +104,18 @@ def create_item(entity):
 ################################################################################
 
 if __name__ == "__main__":
+
+    path_places_db = os.path.join(
+        WKSPACE,
+        path_places_db,
+    )
+    path_output_json = os.path.join(
+        WKSPACE,
+        path_output_json,
+    )
+
+    print(f"--- path_places_db: {path_places_db}")
+    print(f"--- path_output_json: {path_output_json}")
 
     # Create an instance of WikidataJsonDump
     wjd = WikidataJsonDump(wjd_dump_path)
@@ -111,8 +130,8 @@ if __name__ == "__main__":
     for ii, entity_dict in enumerate(wjd):
         if entity_dict["type"] == "item":
             entity = WikidataItem(entity_dict)
-            if is_in_Germay(entity) == True:
-                res = create_item(entity)       # (key=entity.entity_id, value=[(entity.get_label(lang='en')), instance_of, (qid_p131)])
+            if is_in_country(entity) == True:
+                res = create_item_dump_places(entity)       # (key=entity.entity_id, value=[(entity.get_label(lang='en')), instance_of, (qid_p131)])
                 results.append(res)
                 db.set(res[0],res[1])
             else:

@@ -5,7 +5,7 @@ import json
 import re
 from shapely import geometry
 import sys
-ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(ROOT_DIR)
 from data import candidates
 import time
@@ -41,11 +41,55 @@ path_db_all_new_places02 = PARAMS['path']['db_extra'] # places = pickledb.load(R
 path_json_gt = PARAMS['path']['json_gt'] 
 path_db_all_new_occs = PARAMS['path']['db_all_new_occs'] 
 path_db_all_new_labels = PARAMS['path']['db_all_new_labels'] 
+N = PARAMS['predict']['max_cand']
 
 
 # Export
 # path_street_dict_db = 'street_dict.db'
-data_ml = 'ml_gt_data.csv'
+data_ml = PARAMS['path']['data_ml'] 
+
+#---------------------------------
+path_json_suffix = os.path.join(
+    WKSPACE,
+    path_json_suffix,
+)
+
+path_json_prefix = os.path.join(
+    WKSPACE,
+    path_json_prefix,
+)
+path_tsv_links = os.path.join(
+    WKSPACE,
+    path_tsv_links,
+)
+path_db_new_index = os.path.join(
+    WKSPACE,
+    path_db_new_index,
+)
+path_db_all_new_places = os.path.join(
+    WKSPACE,
+    path_db_all_new_places,
+)
+path_db_all_new_places02 = os.path.join(
+    WKSPACE,
+    path_db_all_new_places02,
+)
+path_json_gt = os.path.join(
+    WKSPACE,
+    path_json_gt,
+)
+path_db_all_new_occs = os.path.join(
+    WKSPACE,
+    path_db_all_new_occs,
+)
+path_db_all_new_labels = os.path.join(
+    WKSPACE,
+    path_db_all_new_labels,
+)
+data_ml = os.path.join(
+    WKSPACE,
+    data_ml,
+)
 
 ################################################################################
 
@@ -58,11 +102,11 @@ if __name__ == "__main__":
 
     #---------------------------------
     # Import files
-    with open(path_json_suffix, encoding='utf-8') as file:
+    with open(path_json_suffix, 'r', encoding='utf-8') as file:
         suffix = json.load(file)
 
-    with open(path_json_prefix, encoding='utf-8') as file:  
-        prefix = json.load(file,encoding='utf-8')
+    with open(path_json_prefix, 'r', encoding='utf-8') as file:  
+        prefix = json.load(file)
 
     links = pandas.read_csv(path_tsv_links,sep='\t',index_col=0)
     index = pickledb.load(path_db_new_index, False)
@@ -72,8 +116,8 @@ if __name__ == "__main__":
     # places = pickledb.load(ROOT_DIR + '/data/wikidata/places02.db', False)
     places = pickledb.load(path_db_all_new_places02, False)
 
-    with open(path_json_gt, encoding='utf-8') as file:  
-        gt = json.load(file,encoding='utf-8')
+    with open(path_json_gt, 'r', encoding='utf-8') as file:  
+        gt = json.load(file)
 
     occDB = pickledb.load(path_db_all_new_occs, False)
 
@@ -115,11 +159,17 @@ if __name__ == "__main__":
         street_label = i['streetLabel']['value']
         candidate_id = i['person']['value'].replace('http://www.wikidata.org/entity/', '')
 
-        candidate_list = candidates.get_candidates(street_label,prefix,suffix,links,index)
+        candidate_list = candidates.get_candidates(
+            street_label,
+            prefix,
+            suffix,
+            # links,
+            index,
+        )
         if candidate_list == False:
             continue
         if len(candidate_list) > 50:
-            candidate_list = candidates.get_max_50(candidate_list,links)
+            candidate_list = candidates.get_max_N(candidate_list,links, N=N)
 
         correct_entity_label = labels.get(candidate_id)
         if correct_entity_label != False:

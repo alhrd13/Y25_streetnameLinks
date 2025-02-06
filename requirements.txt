@@ -6,3 +6,6 @@ qwikidata
 PyYAML
 IPython
 geopandas
+tqdm
+wikidata
+wikipedia

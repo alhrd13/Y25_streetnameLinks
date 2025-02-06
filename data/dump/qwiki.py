@@ -1,7 +1,7 @@
 import os
-from qwikidata.linked_data_interface import get_entity_dict_from_api
-from qwikidata.entity import WikidataItem, WikidataProperty, WikidataLexeme
-from qwikidata.claim import WikidataClaimGroup,WikidataClaim
+# from qwikidata.linked_data_interface import get_entity_dict_from_api
+# from qwikidata.entity import WikidataItem, WikidataProperty, WikidataLexeme
+# from qwikidata.claim import WikidataClaimGroup,WikidataClaim
 import json
 
 #.................................
@@ -11,7 +11,7 @@ import yaml
 
 sys.excepthook = ColorTB()
 
-WKSPACE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+WKSPACE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 PATH_CFG = './config.yml'
 
 sys.path.append(WKSPACE)
@@ -21,7 +21,7 @@ with open(PATH_CFG, 'r') as file:
     PARAMS = yaml.safe_load(file)
 #.................................
 
-path_subprops = PARAMS['path']['path_subprops']
+path_subprops = PARAMS['path']['filtered_subprops']
 path_subprops = os.path.join(
     WKSPACE,
     path_subprops,
@@ -32,23 +32,24 @@ f = json.load(open(path_subprops,'r'))
 lang = ['de', 'en', 'fr', 'ru']
 
 person_claims = [
-'P735',  #given name
-'P734',  #family name
-'P106',  #occupation
-'P742'  #pseudonym
+    'P735',  #given name
+    'P734',  #family name
+    'P106',  #occupation
+    'P742'  #pseudonym
 ]
 
 street_claims = [
-'P131',  #located in administrative territorial entity
-'P625',  #coordinates
-'P402',  #OSM-ID
-'P138'  #named after
+    'P131',  #located in administrative territorial entity
+    'P625',  #coordinates
+    'P402',  #OSM-ID
+    'P138'  #named after
 ]
 
 ################################################################################
 
 def is_person_or_street(entity):
     try:
+        # P31: is instance of
         claim_group = entity.get_truthy_claim_group('P31')
         claim = claim_group[0]
         qid = claim.mainsnak.datavalue.value['id']

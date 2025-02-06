@@ -19,7 +19,7 @@ import yaml
 
 sys.excepthook = ColorTB()
 
-WKSPACE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+WKSPACE = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 PATH_CFG = './config.yml'
 
 sys.path.append(WKSPACE)
@@ -34,23 +34,24 @@ with open(PATH_CFG, 'r') as file:
 # User params
 ################################################################################
 
-# # Input
-# wjd_dump_path = "wikidata-20210517-all.json.bz2"
+if __name__ == "main__":
+    # # Input
+    # wjd_dump_path = "wikidata-20210517-all.json.bz2"
 
-# # Output
-# path_output_db = 'extra.db'
-# path_output_json = 'extra.json'
+    # # Output
+    # path_output_db = 'extra.db'
+    # path_output_json = 'extra.json'
 
-# Input
-wjd_dump_path = PARAMS["path"]["wjd_dump_path"]
+    # Input
+    wjd_dump_path = PARAMS["path"]["wjd_dump_path"]
 
-# Output
-path_output_db =PARAMS["path"]["extra_db"]
-path_output_json = PARAMS["path"]["extra_json"]
+    # Output
+    path_output_db =PARAMS["path"]["db_extra"]
+    path_output_json = PARAMS["path"]["json_extra"]
 
 ################################################################################
 
-def create_item(entity):
+def create_item_dump_places02(entity):
     educated_list = []
     work_list = []
     #educated at
@@ -103,7 +104,7 @@ if __name__ == "main__":
             if is_person_or_street(entity) == ENTITY_TYPE:
 
                 # res = (key=entity.entity_id, val=[(educated_list), (work_list)])
-                res = create_item(entity)
+                res = create_item_dump_places02(entity)
                 results.append(res)
                 db.set(res[0],res[1])
             else:

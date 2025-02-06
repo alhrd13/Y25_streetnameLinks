@@ -37,7 +37,8 @@ path:
 
     ##############################################
 
-    wjd_dump_path : '/Users/alexis/Downloads/wikidatawiki-20241201-pages-meta-history27.xml-p125161897p125273261.json.bz2'
+    tmp : "./out/tmp"
+    wjd_dump_path : '/Users/alexis/Documents/04_Code/Y25_streetnameLinks/data/wikidata-20250120-all.json.bz2' # 250127
     db_all_new_names : './out/all_new_names.db'
     db_all_new_occs : './out/all_new_occs.db'
     db_all_new_places: './out/all_new_places.db'
@@ -46,7 +47,7 @@ path:
     # db_extra : './out/extra.db'
     # db_json : './out/extra.json'
     db_extra : './out/places02.db'
-    db_json : './out/places02.json'
+    json_extra : './out/places02.json'
 
 
     db_places : './out/places.db'
@@ -56,16 +57,21 @@ path:
     tsv_polygons : ./data/osm/'polygons_bremen.tsv'
     tsv_test : './out/test.tsv'
 
-    json_suffix : './data/affixes/suffixe.json'
-    json_prefix : './data/affixes/prefixe.json'
+    # json_suffix : './data/affixes/suffixe.json'
+    # json_prefix : './data/affixes/prefixe.json'
+    json_suffix : './out/suffix.json'
+    json_prefix : './out/prefix.json'
     titles_json : './data/affixes/suffixe_titel.json'
-    tsv_links : './out/link_counts_wikidata.tsv' #TODO
+    tsv_links : './out/link_counts_wikidata_search2.tsv' #TODO
+    tsv_links_test : './out/link_counts_wikidata_test.tsv' #TODO
     db_new_index_person : './out/new_index.db'
 
     csv_named_location : './out/named_bremen.csv'
 
     # Person database
+    #TODO: CHANGE
     db_name_data : './out/name_data.db'
+    # db_name_data : './out/name_data_old.db'
     db_new_index : './out/new_index.db'
 
     # Wikidata ground truth
@@ -88,10 +94,19 @@ path:
 
     ml : './out/rfc_1300.joblib'
 
+    data_ml : './out/ml_gt_data.csv'
+
 search:
+    #TODO: change
     lang: 'en'
+    # lang : 'de'
     # For area of reference in diustruict_bremen.py
     id_wikidata_ref_test : 'Q24879'
+    # choice_country_wikidata : "Q183"    # Germany
+    choice_country_wikidata : "Q408"    # Australia
 
 train:
     test_size : .1
+
+predict:
+    max_cand : 50

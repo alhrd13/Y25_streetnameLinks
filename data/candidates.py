@@ -212,9 +212,10 @@ def get_names(
 
 ################################################################################
 
-def get_max_50(
+def get_max_N(
         candidate_list, 
         links,
+        N=50,
     ):
 
     candidate_dict = {}
@@ -229,7 +230,7 @@ def get_max_50(
     sorted_list = sorted(candidate_dict.items(), key=lambda x: x[1])
     test = []
     for t,i in enumerate(sorted_list):
-        if t == 50:
+        if t == N:
             break
         test.append(i)
     return test
