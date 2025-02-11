@@ -78,8 +78,7 @@ path_export_link_counts_db = PARAMS['path']['tsv_links_test']\
 def create_item_all_new(
         entity_dict,
     ):
-    """For a given entity, this function extracts one hot columns associated to different characteristics encountered
-    in wikidata.
+    """
 
     Args:
         entity_dict (_type_): _description_
@@ -132,7 +131,7 @@ def create_item_all_new(
     #.................................
     # Alias
     try:
-        alias_group = entity_dict['aliases']['de']
+        alias_group = entity_dict['aliases'][lang]
         for c in alias_group:
             aliases.append(c['value'])
     except:
@@ -195,7 +194,7 @@ def create_item_all_new(
     #.................................
     # Label
     try:
-        label.append(entity_dict['labels']['de']['value'])
+        label.append(entity_dict['labels'][lang]['value'])
     except:
         label.append('')
 
@@ -216,6 +215,29 @@ def add_suffix_path_db(
 
     path = path.replace(".db", f"{suffix}.db")
     return path
+
+################################################################################
+
+def count_links(
+        entity_dict,
+        db,
+    ):
+    # Count links
+    id_wikidata = entity_dict["title"]
+    try:
+
+        wikipedia_page = entity_dict["sitelinks"][f"{LANG}wiki"]["title"]\
+            .replace(" ", "_")
+        wikipedia_title = wikipedia_page.split("/")[-1]
+        val =  {
+            "id_wikidata" : id_wikidata,
+            "wikipedia_title" : wikipedia_title, 
+            "count_links" : None,
+        }
+        db.set(id_wikidata, val)
+
+    except:
+        pass
 
 ################################################################################
 
@@ -312,6 +334,7 @@ if __name__ == "__main__":
 
         if entity_dict["type"] == "item":
             entity = WikidataItem(entity_dict)
+            link_already_counted= False
 
             # Only process if the item is a person
             if is_person_or_street(entity) == ENTITY_TYPE:
@@ -328,6 +351,13 @@ if __name__ == "__main__":
                 results_db02.append(res)
                 db02.set(res[0],res[1])
 
+                if not link_already_counted:
+                    count_links(
+                        entity_dict=entity_dict,
+                        db=db_count_links,
+                    )
+                    link_already_counted = True
+
             # Data located in the chosen country
             if is_in_country(
                 entity=entity, 
@@ -338,24 +368,13 @@ if __name__ == "__main__":
                 results_db.append(res)
                 db.set(res[0],res[1])
 
-                # Count links
-                id_wikidata = entity_dict["title"]
-                try:
-
-                    wikipedia_page = entity_dict["sitelinks"][f"{LANG}wiki"]["title"]\
-                        .replace(" ", "_")
-                    wikipedia_title = wikipedia_page.split("/")[-1]
-                    val =  {
-                        "id_wikidata" : id_wikidata,
-                        "wikipedia_title" : wikipedia_title, 
-                        "count_links" : None,
-                    }
-                    db_count_links.set(id_wikidata, val)
-
-                except:
-                    pass
+                if not link_already_counted:
+                    count_links(
+                        entity_dict=entity_dict,
+                        db=db_count_links,
+                    )
+                    link_already_counted = True
     
-
         if ii % 10000 == 0:
             t2 = time.time()
             dt = t2 - t1

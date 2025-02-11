@@ -6,12 +6,15 @@ def get_candidates(
         query,
         prefix,
         suffix,
-        linx,
+        # linx,
         index,
     ):
 
+    #---------------------------------
     # Remove '-'
     query = query.replace('-', ' ').rstrip()
+
+    # **********
     # Remove extras: streetname (extras)
     if query.endswith(')') == True:
         try:
@@ -19,22 +22,31 @@ def get_candidates(
             query = query.replace(extra[0],'').rstrip()
         except:
             return False
+        
+    # **********
     # Remove initials
     initials = re.findall('[A-Z]\. ',query)
     for init in initials:
         query = query.replace(init,'').rstrip().lstrip()
+
+    # **********
     # Remove suffix
     for s in suffix:
         if query.endswith(s) == True:
             query = query.replace(s,'').rstrip().lstrip()
             break
+    
+    # **********
     # Remove prefix
     for p in prefix:
         query = query.replace(p,'').rstrip().lstrip()
 
+    # **********
     # Skip street if the query is empty after filtering
     if len(query) == 0:
         return False
+    
+    #---------------------------------
     # Popularity Ranking
     result = index.get(query)
     # Add a '-' if between the last two names if no result was returned
@@ -45,6 +57,8 @@ def get_candidates(
             query_list[backspace] = '-'
             query = ''.join(query_list)
             result = index.get(query)
+
+    # **********
     # Remove the last 's' if there is still no result (e.g. 'Müllersweg')
     # If there are still no results after that, skip to this street
     if result == False:
@@ -69,20 +83,38 @@ def get_hierarchy(
         places,
     ):
 
-    list = []
-    list.append(start)
-    while True:
-        try:
-            item = places.get(start)
-            list.append(item[2])
-            start = item[2]
-        except:
-            break
+    list_containment = []
+    list_containment.append(start)
+    item = None
+    while item != False:
+        # Example places: ('Q15321', [['Q656', 'Q270196']])
+        item = places.get(start)
+
+        if item != False:
+            # print(f">>> start: {start}, item:{item}")
+            # list_containment.append(item[2])
+                # We choose the first item by default - at worse, the is a common node at a lower rank
+            parent = item[0][0]
+            list_containment.append(parent)
+            # start = item[2]
+            start = parent
+            # try:
+            #     # Example places: ('Q15321', [['Q656', 'Q270196']])
+            #     item = places.get(start)
+            #     print(f">>> start: {start}, item:{item}")
+            #     # list_containment.append(item[2])
+            #         # We choose the first item by default - at worse, the is a common node at a lower rank
+            #     parent = item[0][0]
+            #     list_containment.append(parent)
+            #     # start = item[2]
+            #     start = parent
+            # except:
+            #     break
     try:
-        list.remove('')
+        list_containment.remove('')
     except:
         pass
-    return list
+    return list_containment
 
 ################################################################################
 
@@ -122,7 +154,7 @@ def get_candidate_relations(
     #    street_hier = get_hierarchy(street, places)
     street_hier = street
 
-    # Calculate relation score for birth place# Calculate relation score for birth place
+    # Calculate relation score for birth place#
     rel[0] = get_highest_relation_score(street_hier, place_list[0], places)
     # Calculate relation score for death place
     rel[1] = get_highest_relation_score(street_hier, place_list[1], places)
@@ -148,10 +180,13 @@ def get_occupations(
         return occ_data
 
     for o in occs:
+        # Politician
         if o == 'Q82955':
             occ_data[0] = 1
+        # Writer
         if o == 'Q36180':
             occ_data[1] = 1
+        # University teacher 
         if o == 'Q1622272':
             occ_data[2] = 1
         if o == 'Q49757':

@@ -13,34 +13,84 @@ from joblib import load
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, confusion_matrix, cohen_kappa_score
 
-################################################################################
-ROOT_DIR = os.getcwd()
-args = sys.argv
-try:
-    if args[1] == 'bremen':
-        X = pd.read_csv(ROOT_DIR + '/eval/candidates_bremen.csv')
-    elif args[1] == 'nrw':
-        X = pd.read_csv(ROOT_DIR + '/eval/candidates_nrw.csv')
-    else:
-        X = pd.read_csv(args[1])
-except:
-    print('Please select a dataset of street-candidate pairs [bremen | nrw] or choose a fitting file.')
-    exit()
+#.................................
+import os, sys
+from IPython.core.ultratb import ColorTB
+import yaml
 
-candidate_threshold = 0.5
+sys.excepthook = ColorTB()
+
+WKSPACE = os.path.dirname(os.path.abspath(__file__))
+PATH_CFG = './config.yml'
+
+sys.path.append(WKSPACE)
+PATH_CFG = os.path.join(WKSPACE, PATH_CFG)
+
+with open(PATH_CFG, 'r') as file:
+    PARAMS = yaml.safe_load(file)
+#.................................
+
+
+# ################################################################################
+# ROOT_DIR = os.getcwd()
+# args = sys.argv
+# try:
+#     if args[1] == 'bremen':
+#         X = pd.read_csv(ROOT_DIR + '/eval/candidates_bremen.csv')
+#     elif args[1] == 'nrw':
+#         X = pd.read_csv(ROOT_DIR + '/eval/candidates_nrw.csv')
+#     else:
+#         X = pd.read_csv(args[1])
+# except:
+#     print('Please select a dataset of street-candidate pairs [bremen | nrw] or choose a fitting file.')
+#     exit()
+
+# candidate_threshold = 0.5
+candidate_threshold = 0
 
 #---------------------------------
-path_ml = '/ml/rfc_1300.joblib'
-path_export_results_pred = 'best_candidate.csv'
+path_ml = PARAMS['path']['ml']
+path_export_results_pred = PARAMS['path']['best_candidate']
+path_candidates = PARAMS["path"]["path_candidates_prepared_for_predict"]
+
+path_candidates = os.path.join(
+    WKSPACE,
+    path_candidates,
+)
+path_ml = os.path.join(
+    WKSPACE,
+    path_ml,
+)
+path_export_results_pred = os.path.join(
+    WKSPACE,
+    path_export_results_pred,
+)
+path_candidates = os.path.join(
+    WKSPACE,
+    path_candidates,
+)
+
+X = pd.read_csv(path_candidates)
 
 ################################################################################
 
 if __name__ == "__main__":
+
+    path_ml = os.path.join(
+        WKSPACE,
+        path_ml,
+    )
+    path_export_results_pred = os.path.join(
+        WKSPACE,
+        path_export_results_pred,
+    )
+
     # ml data
-    X_test = X.drop(['street', 'candidate','district','correct'],axis=1)
+    # X_test = X.drop(['street', 'candidate', 'candidate_explicit', 'district','correct'],axis=1)
+    X_test = X.drop(['street', 'candidate', 'candidate_explicit'],axis=1)
 
     # model
-    model = load(ROOT_DIR + path_ml)
+    model = load(path_ml)
 
     # predict
     prob = model.predict_proba(X_test)
@@ -51,8 +101,8 @@ if __name__ == "__main__":
 
     # Sort by propability and then remove duplicate streets and districts
     # This should leave the best candidate for every street per district
-    X = X.sort_values(by=['proba'], ascending=False).drop_duplicates(subset=['street','district'], keep='first')
-
+    # X = X.sort_values(by=['proba'], ascending=False).drop_duplicates(subset=['street','district'], keep='first')
+    X = X.sort_values(by=['proba'], ascending=False).drop_duplicates(subset=['street'], keep='first')
 
 
     # Drop all candidates below the treshold

@@ -62,7 +62,7 @@ path:
     json_suffix : './out/suffix.json'
     json_prefix : './out/prefix.json'
     titles_json : './data/affixes/suffixe_titel.json'
-    tsv_links : './out/link_counts_wikidata_search2.tsv' #TODO
+    tsv_links : './out/link_counts_wikidata.tsv' #TODO
     tsv_links_test : './out/link_counts_wikidata_test.tsv' #TODO
     db_new_index_person : './out/new_index.db'
 
@@ -96,6 +96,10 @@ path:
 
     data_ml : './out/ml_gt_data.csv'
 
+    best_candidate : "./out/best_candidate_melbourne.csv"
+    candidates_eval : "./out/named_melbourne.csv"
+    path_candidates_prepared_for_predict : "./out/named_melbourne_prepared_for_predict.csv"
+
 search:
     #TODO: change
     lang: 'en'
@@ -106,7 +110,9 @@ search:
     choice_country_wikidata : "Q408"    # Australia
 
 train:
-    test_size : .1
+    # test_size : .1 # Original paper
+    test_size : .01
 
 predict:
     max_cand : 50
+    city_of_the_streets_for_eval : "Q3141"

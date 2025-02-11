@@ -49,7 +49,7 @@ if __name__ == "__main__":
             rdfs:label ?street_name ; 
             wdt:P31 ?type_street ;    # instance of 
             wdt:P17 wd:Q408 ;     # Country=Australia
-            wdt:P131 ?admin.      # ocated in the administrative territorial entity
+            wdt:P131 ?admin.      # Located in the administrative territorial entity
 
         ?origin_id rdfs:label ?origin_name ;
             wdt:P31 wd:Q5 .       # Human
@@ -57,7 +57,7 @@ if __name__ == "__main__":
         FILTER (?type_street IN (wd:Q34442, wd:Q79007, wd:Q537127))  # road, street, road bridge
         FILTER (langMatches( lang(?street_name), "EN" ) )   
         FILTER (lang(?origin_name) = "en")
-        FILTER (?admin NOT IN (wd:Q3141, wd:Q6811747))  # Melbourne, Melbourne central business district 
+        # FILTER (?admin NOT IN (wd:Q3141, wd:Q6811747))  # Melbourne, Melbourne central business district 
         
         SERVICE wikibase:label { bd:serviceParam wikibase:language "en". } 
     }

@@ -4,7 +4,7 @@ import pickledb as p
 from qwikidata.json_dump import WikidataJsonDump
 import requests
 import pandas as pd
-
+import logging
 #.................................
 import os, sys
 from IPython.core.ultratb import ColorTB
@@ -36,7 +36,7 @@ LANG = PARAMS['search']['lang']
 # Process
 create_map_idWikidata_idWikipedia = False
 cal_counts_wikipedia = True
-batch_size_search = 200000
+batch_size_search = 100000
 
 # Debug
 max_iter = -1
@@ -46,6 +46,20 @@ max_iter = -1
 path_export_link_counts_tsv = PARAMS['path']['tsv_links']
 path_export_link_counts_db = PARAMS['path']['tsv_links']\
     .replace(".tsv", ".db")
+path_log = os.path.join(
+    WKSPACE,
+    "out",
+    "links_count.log",
+)
+
+logging.basicConfig(
+    filename="app.log",
+    encoding="utf-8",
+    filemode="a",
+    format="{asctime} - {levelname} - {message}",
+    style="{",
+    datefmt="%Y-%m-%d %H:%M",
+)
 
 # ################################################################################
 
@@ -72,7 +86,7 @@ def get_count_wikipedia(
     while response.status_code == 429 and do_search:
         response = requests.get(url_completed)
         attempt += 1
-        if attempt == 20:
+        if attempt == 10:
             do_search = False
     
     try:
@@ -92,7 +106,9 @@ def get_count_wikipedia(
         if counter.value % 10000 == 0:
             time_end = time.time()
             duration = round(time_end - time_start.value, 0)
-            print(f"--- Done: {counter.value} / {counter_max.value} - Time: {duration} s")
+            msg = f"--- Done: {counter.value} / {counter_max.value} - Time: {duration} s"
+            print(msg)
+            logging.info(msg)
 
     return count_links
 
@@ -204,7 +220,6 @@ if __name__ == "__main__":
         )
         map_wikipediaTitle_idWikidata = p.load(path_map_wikipediaTitle_idWikidata, False)
 
-        counter_max = len(list(db.getall()))
         count_data_to_treat = 0
 
         for idx, key in enumerate(tqdm(db.getall())):
@@ -213,13 +228,16 @@ if __name__ == "__main__":
                 break
 
             val = db.get(key)
-            if val["count_links"] is None:
+            if val["count_links"] is None or val["count_links"] == 0:
                 count_data_to_treat += 1
 
                 wikipedia_title = val["wikipedia_title"]
                 map_wikipediaTitle_idWikidata.set(wikipedia_title, key)
 
                 all_params.append(wikipedia_title)
+
+        counter_max = len(all_params)
+        counter_max_int = counter_max
 
         # Time
         time_start = time.time()
@@ -239,6 +257,7 @@ if __name__ == "__main__":
 
         # We work per batch to save after each iteration
 
+        print(f"--- Multi-process to query the API: {counter_max_int} items")
         for batch_idx in get_batch(
                 iterable=all_params,
                 batch_size=batch_size_search,

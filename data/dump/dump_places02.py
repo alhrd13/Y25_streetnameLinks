@@ -34,7 +34,7 @@ with open(PATH_CFG, 'r') as file:
 # User params
 ################################################################################
 
-if __name__ == "main__":
+if __name__ == "__main__":
     # # Input
     # wjd_dump_path = "wikidata-20210517-all.json.bz2"
 
@@ -49,41 +49,84 @@ if __name__ == "main__":
     path_output_db =PARAMS["path"]["db_extra"]
     path_output_json = PARAMS["path"]["json_extra"]
 
+
+    #---------------------------------
+    wjd_dump_path = os.path.join(
+        WKSPACE,
+        wjd_dump_path,
+    )
+
+    path_output_db = os.path.join(
+        WKSPACE,
+        path_output_db,
+    )
+
+    path_output_json = os.path.join(
+        WKSPACE,
+        path_output_json,
+    )
+
+
+
 ################################################################################
 
-def create_item_dump_places02(entity):
-    educated_list = []
-    work_list = []
-    #educated at
-    try:
-        claim_group_P69 = entity.get_truthy_claim_group('P69')
-        for c in claim_group_P69:
-            qid_p69 = c.mainsnak.datavalue.value['id']
-            educated_list.append(qid_p69)
-    except:
-        pass
+# def create_item_dump_places02(entity):
+#     educated_list = []
+#     work_list = []
+#     #educated at
+#     try:
+#         claim_group_P69 = entity.get_truthy_claim_group('P69')
+#         for c in claim_group_P69:
+#             qid_p69 = c.mainsnak.datavalue.value['id']
+#             educated_list.append(qid_p69)
+#     except:
+#         pass
 
-    #work
+#     #work
+#     try:
+#         claim_group_P937 = entity.get_truthy_claim_group('P937')
+#         for c in claim_group_P937:
+#             qid_p937 = c.mainsnak.datavalue.value['id']
+#             work_list.append(qid_p937)
+#     except:
+#         pass
+
+#     #.................................
+#     # Output
+#     key = entity.entity_id
+#     value=[
+#         (educated_list),
+#         (work_list)
+#     ]
+#     return (key,value)
+
+################################################################################
+def create_item_dump_places02(entity):
+    admin_list = []
+
+    #located in administrative territorial entity
     try:
-        claim_group_P937 = entity.get_truthy_claim_group('P937')
-        for c in claim_group_P937:
-            qid_p937 = c.mainsnak.datavalue.value['id']
-            work_list.append(qid_p937)
+        claim_group_P69 = entity.get_truthy_claim_group('P131')
+        for c in claim_group_P69:
+            qid_p131 = c.mainsnak.datavalue.value['id']
+            admin_list.append(qid_p131)
     except:
         pass
 
     #.................................
     # Output
-    key = entity.entity_id
-    value=[
-        (educated_list),
-        (work_list)
-    ]
-    return (key,value)
+    if len(admin_list) != 0:
+        key = entity.entity_id
+        value=[
+            (admin_list)
+        ]
+        return (key, value)
+    else:
+        return None
 
 ################################################################################
 
-if __name__ == "main__":
+if __name__ == "__main__":
 
     # create an instance of WikidataJsonDump
     wjd = WikidataJsonDump(wjd_dump_path)
@@ -93,22 +136,48 @@ if __name__ == "main__":
 
 
     # Create an iterable of WikidataItem
-    ENTITY_TYPE = 'person'
+    # ENTITY_TYPE = 'person'    # Original paper
+    ENTITY_TYPE = "street"
     
     results = []
     t1 = time.time()
-    
+
+    count_items = 0
     for ii, entity_dict in enumerate(wjd):
+
+        # # Debug
+        # if count_items == 10:
+        #     break
+
         if entity_dict["type"] == "item":
             entity = WikidataItem(entity_dict)
-            if is_person_or_street(entity) == ENTITY_TYPE:
+            # if is_person_or_street(entity) == ENTITY_TYPE:
 
-                # res = (key=entity.entity_id, val=[(educated_list), (work_list)])
-                res = create_item_dump_places02(entity)
+            
+            # **********
+            # res = (key=entity.entity_id, val=[(educated_list), (work_list)])
+
+            # **********
+
+            # filtered_data = filtered_properties(
+            #      entity_dict=entity_dict,
+            #      is_type=ENTITY_TYPE,
+            # )
+            #located in administrative territorial entity
+            # located_in_administrative_territorial_entity = filtered_data['claims']["P131"]
+            # res = (entity.entity_id, located_in_administrative_territorial_entity)
+
+            # Export
+            # res: ('Q15321', [['Q656', 'Q270196']])
+            res = create_item_dump_places02(entity)
+            if res is not None:
+                # print("---", res)
                 results.append(res)
                 db.set(res[0],res[1])
-            else:
-                pass
+
+                count_items += 1
+            # else:
+            #     pass
 
         # Output to see the progression
         if ii % 10000 == 0:
