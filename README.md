@@ -60,7 +60,8 @@ The code will return a csv-file containing the candidate with the highest score 
     - `curl -o Y25_streetnameLinks/data/wikidata_all.json.bz2 https://dumps.wikimedia.org/wikidatawiki/entities/latest-all.json.bz2` 
     - Choose a dump: e.g. "wikidata-20210517-all.json.bz2"
   - Wikidata (with the links between street <> person) = base for ground truth (model training)
-    - `./data/wikidata/create_wikidata_all.py`
+    - Open `./data/wikidata/create_wikidata_all.py`
+    - Change the SPARQL query if your want data different from Australia and not related to your test dataset
   - For the inference = base for inference. We must create a CSV file with the following columns:
     - Compulsory: name, district
     - Optional: etymology_wikidata

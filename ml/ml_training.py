@@ -13,7 +13,7 @@ import yaml
 
 sys.excepthook = ColorTB()
 
-WKSPACE = os.path.dirname(os.path.abspath(__file__))
+WKSPACE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PATH_CFG = './config.yml'
 
 sys.path.append(WKSPACE)
@@ -23,18 +23,14 @@ with open(PATH_CFG, 'r') as file:
     PARAMS = yaml.safe_load(file)
 #.................................
 
-test_size = PARAMS['train']['split_data']
-path_X_train = PARAMS['path']['path_X_train']
-path_y_train = PARAMS['path']['path_y_train']
-path_X_test = PARAMS['path']['path_X_test']
-path_y_test = PARAMS['path']['path_y_test']
+
 
 ################################################################################
 # Import
-path_X_train = PARAMS['path']['path_X_train']
-path_y_train = PARAMS['path']['path_y_train']
-path_X_test = PARAMS['path']['path_X_test']
-path_y_test = PARAMS['path']['path_y_test']
+path_X_train = PARAMS['path']['gt_X_train']
+path_y_train = PARAMS['path']['gt_y_train']
+path_X_test = PARAMS['path']['gt_X_test']
+path_y_test = PARAMS['path']['gt_y_test']
 
 # Export
 path_ml = PARAMS['path']['ml']
@@ -45,6 +41,27 @@ do_test = True
 ################################################################################
 
 if __name__ == "__main__":
+
+    path_X_train = os.path.join(
+        WKSPACE,
+        path_X_train
+    )
+    path_y_train = os.path.join(
+        WKSPACE,
+        path_y_train
+    )
+    path_X_test = os.path.join(
+        WKSPACE,
+        path_X_test
+    )
+    path_y_test = os.path.join(
+        WKSPACE,
+        path_y_test
+    )
+    path_ml = os.path.join(
+        WKSPACE,
+        path_ml
+    )
 
     # Load the training and test dataset
     X_train = pd.read_csv(path_X_train)
